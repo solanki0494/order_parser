@@ -9,7 +9,7 @@ import java.util.concurrent.LinkedBlockingDeque;
 public class ParserJavaApplication {
 
     private static final int QUEUE_SIZE = 100;
-    private static BlockingQueue<FileRecord> csvQueue;
+    private static BlockingQueue<FileRecord> queue;
     private static Collection<Thread> producerThreadCollection, allThreadCollection;
 
 
@@ -20,7 +20,7 @@ public class ParserJavaApplication {
         producerThreadCollection = new ArrayList<>();
         allThreadCollection = new ArrayList<>();
 
-        csvQueue = new LinkedBlockingDeque<>(QUEUE_SIZE);
+        queue = new LinkedBlockingDeque<>(QUEUE_SIZE);
 
         createAndStartProducers(csvFilename, jsonFilename);
         createAndStartConsumers();
@@ -33,15 +33,15 @@ public class ParserJavaApplication {
             }
         }
 
-        System.out.println("Controller finished");
+        System.out.println("Parsing finished");
 
     }
 
     private static void createAndStartProducers(String csvFilename, String jsonFilename){
-        Producer csvProducer = new Producer(csvFilename, FileType.CSV, csvQueue);
+        Producer csvProducer = new Producer(csvFilename, FileType.CSV, queue);
         Thread csvProducerThread = new Thread(csvProducer,"producer-1");
 
-        Producer jsonProducer = new Producer(jsonFilename, FileType.JSON, csvQueue);
+        Producer jsonProducer = new Producer(jsonFilename, FileType.JSON, queue);
         Thread jsonProducerThread = new Thread(jsonProducer,"producer-2");
 
         producerThreadCollection.add(csvProducerThread);
@@ -55,15 +55,15 @@ public class ParserJavaApplication {
 
     private static void createAndStartConsumers(){
         for(int i=0; i<10; i++){
-            Thread consumer = new Thread(new Consumer(csvQueue), "consumer-1");
+            Thread consumer = new Thread(new Consumer(queue), "consumer-"+i);
             allThreadCollection.add(consumer);
             consumer.start();
         }
     }
 
     public static boolean isProducerAlive(){
-        for(Thread t: producerThreadCollection){
-            if(t.isAlive())
+        for(Thread thread: producerThreadCollection){
+            if(thread.isAlive())
                 return true;
         }
         return false;

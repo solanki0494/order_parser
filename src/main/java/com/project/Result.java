@@ -1,7 +1,7 @@
 package com.project;
 
 public enum Result {
-    OK("Ok"), ERROR("Error");
+    OK("OK"), ERROR("Error");
 
     private String description;
 
